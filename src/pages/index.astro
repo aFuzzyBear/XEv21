@@ -1,0 +1,163 @@
+---
+import XElement from '../components/XElement.js'
+
+const {HelloWorld, Confetti, ConfettiButton} = XElement
+---
+
+<!DOCTYPE >
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style lang="scss">
+    :root{
+        background-color: #1d1160;
+        overflow: hidden;
+    }
+        hello-world{
+            font-size: xx-large;
+        }
+        .btn{
+            font-size: x-large;
+        }
+        .confetti{
+              position: absolute;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: space-evenly;
+            align-items: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <Confetti class="confetti" id="confetti_parent"
+        @imports={{  
+          'confetti:default':Astro.resolve('../functions/confetti.mjs'),
+          'randomInRange':Astro.resolve('../functions/utils.mjs'),
+        }}
+        @do={(el,data)=>{
+            $$.data={random:randomInRange }
+            console.log(data)
+          }}
+        @animate={[
+            { opacity: 0 },
+            { opacity: 1 }
+            ]}
+        @animateOptions={
+                {duration: 5000,
+                iterations: 1}
+            }
+        >
+          <ConfettiButton @is='button' class="btn"
+              @do={async(el,data)=>{
+                let obj = Object.entries($$)
+              console.log('this one', obj,data['data'] )
+            }}
+            @click={()=> {
+              let config={
+                angle: randomInRange(55, 125),
+                spread: randomInRange(50, 70),
+                particleCount: randomInRange(50, 100),
+                origin: { y: 0.6 }
+              }
+              confetti(config)
+              }}
+          >
+            Random Confetti from a Script
+          </ConfettiButton>
+          <ConfettiButton @is='button' class="btn"
+            @do={()=>console.log('Next one',$$)}
+                @click={()=>{
+                  console.log(confetti)
+                  confetti()
+                  }}
+            >
+             Confetti 
+            </ConfettiButton>
+        <ConfettiButton @is='button' class="btn"
+           	@click={()=> {
+				const duration = 5 * 1000;
+				const animationEnd = Date.now() + duration;
+				const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+				function randomInRange(min, max) {
+  					return Math.random() * (max - min) + min;
+				}
+				const interval = setInterval(function() {
+				  const timeLeft = animationEnd - Date.now();
+
+				  if (timeLeft <= 0) {
+				    return clearInterval(interval);
+				  }
+
+				  const particleCount = 50 * (timeLeft / duration);
+				  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+				  confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+				}, 250);
+	            }}
+	    >
+		Fireworks  Confetti
+        </ConfettiButton>
+        <ConfettiButton @is='button' class="btn"
+            @click={()=>{
+                			const duration = 5 * 1000;
+			const animationEnd = Date.now() + duration;
+			let skew = 1;
+			
+			function randomInRange(min, max) {
+			  return Math.random() * (max - min) + min;
+			}
+			
+			(function frame() {
+			  const timeLeft = animationEnd - Date.now();
+			  const ticks = Math.max(200, 500 * (timeLeft / duration));
+			  skew = Math.max(0.8, skew - 0.001);
+			
+			  confetti({
+			    particleCount: 1,
+			    startVelocity: 0,
+			    ticks: ticks,
+			    origin: {
+			      x: Math.random(),
+			      y: (Math.random() * skew) - 0.2
+			    },
+			    colors: ['#ffffff'],
+			    shapes: ['circle'],
+			    gravity: randomInRange(0.4, 0.6),
+			    scalar: randomInRange(0.4, 1),
+			    drift: randomInRange(-0.4, 0.4)
+			  });
+			
+			  if (timeLeft > 0) {
+			    requestAnimationFrame(frame);
+			  }
+			}());
+		}}
+        >
+            Snow
+        </ConfettiButton>
+    </Confetti>
+
+<XElement @is="p" style="font-size: xx-large; color:white;"
+    @animate={[
+    { transform: 'translateX(0px)' },
+    { transform: 'translateX(300px)' }
+    ]}
+    @animateOptions={
+        {duration: 5000,
+        iterations: 'Infinity'}
+    }
+    @click={()=>confetti()}
+  >
+  See, I'm a Text in motion
+</XElement>
+</body>
+</html>
